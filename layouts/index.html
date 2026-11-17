@@ -32,6 +32,11 @@
       min-width: 0;
       min-height: 100%;
     }
+    html {
+      height: 100%;
+      /* iframe内ではiframeのビューポートを基準にする */
+      container-type: size;
+    }
     body {
       font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
       background-color: #1e1e24;
@@ -39,9 +44,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: clamp(4px, 2.5vmin, 20px);
+      min-height: 100%;
+      padding: clamp(4px, min(2.5cqi, 2.5cqb), 20px);
       text-align: center;
       overflow: auto;
       cursor: pointer; /* クリックできることを示すカーソル */
@@ -50,9 +54,9 @@
       max-width: 600px;
       width: min(100%, 600px);
       min-width: 0;
-      padding: clamp(8px, 4vmin, 32px);
+      padding: clamp(8px, min(4cqi, 4cqb), 32px);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: clamp(5px, 1.5vmin, 12px);
+      border-radius: clamp(5px, min(1.5cqi, 1.5cqb), 12px);
       background: rgba(255, 255, 255, 0.03);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       opacity: 0;
@@ -61,14 +65,14 @@
     }
     .frame.visible { opacity: 1; }
     .quote-body {
-      font-size: clamp(0.78rem, min(4.2vw, 5.2vh), 1.25rem);
+      font-size: clamp(0.78rem, min(4.2cqi, 5.2cqb), 1.25rem);
       line-height: 1.65;
-      margin-bottom: clamp(8px, 2.5vmin, 20px);
+      margin-bottom: clamp(8px, min(2.5cqi, 2.5cqb), 20px);
     }
     .quote-body p { margin-bottom: 0.65em; }
     .quote-body p:last-child { margin-bottom: 0; }
     .quote-meta {
-      font-size: clamp(0.65rem, min(3vw, 3.8vh), 0.9rem);
+      font-size: clamp(0.65rem, min(3cqi, 3.8cqb), 0.9rem);
       line-height: 1.4;
       color: #a0a0b0;
       overflow-wrap: anywhere;
