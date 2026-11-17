@@ -1,0 +1,141 @@
+{{- /* 
+  コンテンツの処理:
+  content/ 直下にある quote-01.md などのファイルを取得し、
+  public/quote/001.json などの形式で出力するための準備をします。
+*/ -}}
+{{- $pages := where .Site.RegularPages "Section" "" -}}
+{{- $quotes := where $pages "File.BaseFileName" "like" "quote-" -}}
+{{- $sortedQuotes := sort $quotes "File.BaseFileName" -}}
+{{- $total := len $sortedQuotes -}}
+
+{{- range $index, $page := $sortedQuotes -}}
+  {{- $num := add $index 1 -}}
+  {{- $filename := printf "quote/%03d.json" $num -}}
+  {{- $data := dict
+    "title" $page.Title
+    "author" ($page.Params.author | default "")
+    "content" $page.Content
+  -}}
+  {{- $res := $data | jsonify | resources.FromString $filename -}}
+  {{- $noop := $res.RelPermalink -}}
+{{- end -}}
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ .Title }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+      background-color: #1e1e24;
+      color: #f4f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+      overflow: hidden;
+      cursor: pointer; /* クリックできることを示すカーソル */
+    }
+    .frame {
+      max-width: 600px;
+      width: 100%;
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .frame.visible { opacity: 1; }
+    .quote-body {
+      font-size: 1.25rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .quote-body p { margin-bottom: 0.8em; }
+    .quote-body p:last-child { margin-bottom: 0; }
+    .quote-meta { font-size: 0.9rem; color: #a0a0b0; }
+    .quote-title { font-weight: bold; color: #d0d0e0; }
+  </style>
+</head>
+<body>
+
+  <div class="frame" id="frame">
+    <div class="quote-body" id="quote-body"></div>
+    <div class="quote-meta">
+      <span class="quote-title" id="quote-title"></span>
+      <span id="quote-author"></span>
+    </div>
+  </div>
+
+  <script>
+    const totalQuotes = Number("{{ $total }}");
+    let currentQuoteNum = 0; // 現在表示中の名言番号を保持する変数
+    let isAnimating = false; // 連打防止用のフラグ
+
+    const frameEl = document.getElementById('frame');
+    const bodyEl = document.getElementById('quote-body');
+    const titleEl = document.getElementById('quote-title');
+    const authorEl = document.getElementById('authorEl') || document.getElementById('quote-author');
+
+    async function showRandomQuote() {
+      // 名言が1つ以下、またはアニメーション中（連打）の場合は何もしない
+      if (totalQuotes <= 1 || isAnimating) return;
+
+      isAnimating = true;
+      frameEl.classList.remove('visible');
+
+      let nextNum;
+      // 前回と同じ番号が選ばれた場合は、違う番号になるまで選び直す
+      do {
+        nextNum = Math.floor(Math.random() * totalQuotes) + 1;
+      } while (nextNum === currentQuoteNum);
+
+      currentQuoteNum = nextNum; // 選んだ番号を記憶
+      const padded = String(nextNum).padStart(3, '0');
+
+      try {
+        // キャッシュを避けるためにタイムスタンプを付与（必要に応じて）
+        // const res = await fetch(`/quote/${padded}.json?t=${Date.now()}`);
+        const res = await fetch(`/quote/${padded}.json`);
+        
+        if (!res.ok) throw new Error('Network response was not ok');
+        
+        const selected = await res.json();
+
+        setTimeout(() => {
+          bodyEl.innerHTML = selected.content;
+          titleEl.textContent = selected.title ? `『${selected.title}』` : '';
+          authorEl.textContent = selected.author ? ` / ${selected.author}` : '';
+          frameEl.classList.add('visible');
+          isAnimating = false; // アニメーション完了
+        }, 800);
+      } catch (e) {
+        console.error('読み込みエラー:', e);
+        frameEl.classList.add('visible');
+        isAnimating = false;
+      }
+    }
+
+    // 初回読み込み
+    // 最初は重複チェックをスキップして確実に表示させるため、一時的にcurrentQuoteNumを0以外にするか、
+    // 初回のみdo-whileを回避するロジックが必要ですが、totalQuotes > 1 であれば問題ありません。
+    if (totalQuotes > 0) {
+      showRandomQuote();
+    }
+
+    setInterval(showRandomQuote, 15000);
+    
+    // 画面クリック時のイベント
+    document.body.addEventListener('click', (e) => {
+      // リンクなどのクリックを妨げないようにする場合は条件分岐を追加
+      showRandomQuote();
+    });
+  </script>
+</body>
+</html>

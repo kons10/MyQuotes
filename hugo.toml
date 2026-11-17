@@ -1,0 +1,9 @@
+baseURL = 'https://example.org/'
+languageCode = 'ja'
+title = 'ランダム語録・歌詞フレーム'
+[outputFormats]
+  [outputFormats.QUOTE_ITEM]
+    mediaType = "application/json"
+    baseName = "index"
+    isPlainText = true
+    notAlternative = true
