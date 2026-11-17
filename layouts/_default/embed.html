@@ -1,12 +1,18 @@
 {{- /*
   iframe edition:
-  親ページ側で指定された iframe の幅・高さに合わせて表示を調整します。
+  語録データをページ内に埋め込み、JSONファイルへの追加リクエストを不要にします。
 */ -}}
 {{- $pages := where .Site.RegularPages "Section" "" -}}
 {{- $quotes := where $pages "File.BaseFileName" "like" "quote-" -}}
 {{- $sortedQuotes := sort $quotes "File.BaseFileName" -}}
-{{- $total := len $sortedQuotes -}}
-{{- $quoteURL := "quote/" | relURL -}}
+{{- $quoteData := slice -}}
+{{- range $sortedQuotes -}}
+  {{- $quoteData = $quoteData | append (dict
+    "title" .Title
+    "author" (.Params.author | default "")
+    "content" .Content
+  ) -}}
+{{- end -}}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -72,9 +78,10 @@
   </main>
 
   <script>
-    const totalQuotes = Number("{{ $total }}");
-    const quoteBaseURL = {{ $quoteURL | jsonify }};
-    let currentQuoteNum = 0;
+    // Hugoが生成時に語録データを埋め込むため、fetch先のパスに依存しません。
+    const quotes = {{ $quoteData | jsonify | safeJS }};
+    const totalQuotes = quotes.length;
+    let currentQuoteIndex = -1;
     let isAnimating = false;
 
     const frameEl = document.getElementById("frame");
@@ -83,38 +90,28 @@
     const authorEl = document.getElementById("quote-author");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    async function showRandomQuote() {
-      if (totalQuotes < 1 || isAnimating) return;
+    function showRandomQuote() {
+      if (totalQuotes === 0 || isAnimating) return;
 
       isAnimating = true;
       frameEl.classList.remove("visible");
 
-      let nextNum = 1;
+      let nextIndex = 0;
       if (totalQuotes > 1) {
         do {
-          nextNum = Math.floor(Math.random() * totalQuotes) + 1;
-        } while (nextNum === currentQuoteNum);
+          nextIndex = Math.floor(Math.random() * totalQuotes);
+        } while (nextIndex === currentQuoteIndex);
       }
-      currentQuoteNum = nextNum;
+      currentQuoteIndex = nextIndex;
 
-      const padded = String(nextNum).padStart(3, "0");
-      try {
-        const response = await fetch(quoteBaseURL + padded + ".json");
-        if (!response.ok) throw new Error("Quote request failed: " + response.status);
-        const selected = await response.json();
-
-        window.setTimeout(() => {
-          bodyEl.innerHTML = selected.content || "";
-          titleEl.textContent = selected.title ? "『" + selected.title + "』" : "";
-          authorEl.textContent = selected.author ? " / " + selected.author : "";
-          frameEl.classList.add("visible");
-          isAnimating = false;
-        }, reducedMotion ? 0 : 350);
-      } catch (error) {
-        console.error("語録の読み込みに失敗しました:", error);
+      const selected = quotes[nextIndex];
+      window.setTimeout(() => {
+        bodyEl.innerHTML = selected.content || "";
+        titleEl.textContent = selected.title ? "『" + selected.title + "』" : "";
+        authorEl.textContent = selected.author ? " / " + selected.author : "";
         frameEl.classList.add("visible");
         isAnimating = false;
-      }
+      }, reducedMotion ? 0 : 350);
     }
 
     if (totalQuotes > 0) {
