@@ -27,6 +27,11 @@
   <title>{{ .Title }}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-width: 0;
+      min-height: 100%;
+    }
     body {
       font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
       background-color: #1e1e24;
@@ -35,32 +40,47 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 24px;
+      min-height: 100dvh;
+      padding: clamp(4px, 2.5vmin, 20px);
       text-align: center;
-      overflow: hidden;
+      overflow: auto;
       cursor: pointer; /* クリックできることを示すカーソル */
     }
     .frame {
       max-width: 600px;
-      width: 100%;
-      padding: 32px;
+      width: min(100%, 600px);
+      min-width: 0;
+      padding: clamp(8px, 4vmin, 32px);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
+      border-radius: clamp(5px, 1.5vmin, 12px);
       background: rgba(255, 255, 255, 0.03);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transition: opacity 0.8s ease-in-out;
+      overflow-wrap: anywhere;
     }
     .frame.visible { opacity: 1; }
     .quote-body {
-      font-size: 1.25rem;
-      line-height: 1.8;
-      margin-bottom: 20px;
+      font-size: clamp(0.78rem, min(4.2vw, 5.2vh), 1.25rem);
+      line-height: 1.65;
+      margin-bottom: clamp(8px, 2.5vmin, 20px);
     }
-    .quote-body p { margin-bottom: 0.8em; }
+    .quote-body p { margin-bottom: 0.65em; }
     .quote-body p:last-child { margin-bottom: 0; }
-    .quote-meta { font-size: 0.9rem; color: #a0a0b0; }
+    .quote-meta {
+      font-size: clamp(0.65rem, min(3vw, 3.8vh), 0.9rem);
+      line-height: 1.4;
+      color: #a0a0b0;
+      overflow-wrap: anywhere;
+    }
     .quote-title { font-weight: bold; color: #d0d0e0; }
+    @media (max-width: 360px), (max-height: 220px) {
+      .frame { padding: 6px; }
+      .quote-body { line-height: 1.45; margin-bottom: 6px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .frame { transition: none; }
+    }
   </style>
 </head>
 <body>
