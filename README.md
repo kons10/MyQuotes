@@ -22,11 +22,11 @@ Hugo で生成するランダム語録・歌詞フレームです。
 
 ## 語録に画像を付ける
 
-各語録 Markdown の front matter に \`image\` と \`image_alt\` を指定すると、画像付きレイアウトになります。
+各語録 Markdown の front matter に `image` と `image_alt` を指定すると、画像付きレイアウトになります。
 
-画像ファイルは \`static/images/\` に配置します。たとえば \`static/images/quote-01.jpg\` を使う場合：
+画像ファイルは `static/images/` に配置します。たとえば `static/images/quote-01.jpg` を使う場合：
 
-\`\`\`yaml
+```yaml
 ---
 title: "語録タイトル"
 author: "作者"
@@ -34,11 +34,11 @@ image: "/images/quote-01.jpg"
 image_alt: "画像の説明"
 ---
 語録本文
-\`\`\`
+```
 
 - **画像あり：** 広い表示領域では左に画像、右に語録を表示します。
 - **小さなiframe：** 画像を上、語録を下に配置します。
 - **画像なし：** 語録を従来どおり中央に表示します。
 - 画像は自動でモノクロ表示になります。元画像ファイルは変更されません。
 
-\`image\` を省略すれば、画像なしの表示になります。
+`image` を省略すれば、画像なしの表示になります。
