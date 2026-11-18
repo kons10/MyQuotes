@@ -229,7 +229,7 @@
         window.setTimeout(() => {
           bodyEl.innerHTML = selected.content || '';
           titleEl.textContent = selected.title ? '『' + selected.title + '』' : '';
-          authorEl.textContent = selected.author ? \` / \${selected.author}\` : '';
+          authorEl.textContent = selected.author ? ' / ' + selected.author : '';
 
           const oldImage = frameEl.querySelector('.quote-image-wrap');
           if (oldImage) oldImage.remove();
