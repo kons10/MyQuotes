@@ -221,14 +221,14 @@
       const padded = String(nextNum).padStart(3, '0');
 
       try {
-        const res = await fetch(\`/quote/\${padded}.json\`);
+        const res = await fetch('/quote/' + padded + '.json');
         if (!res.ok) throw new Error('Network response was not ok');
 
         const selected = await res.json();
 
         window.setTimeout(() => {
           bodyEl.innerHTML = selected.content || '';
-          titleEl.textContent = selected.title ? \`『\${selected.title}』\` : '';
+          titleEl.textContent = selected.title ? '『' + selected.title + '』' : '';
           authorEl.textContent = selected.author ? \` / \${selected.author}\` : '';
 
           const oldImage = frameEl.querySelector('.quote-image-wrap');
